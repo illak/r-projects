@@ -1,0 +1,99 @@
+---
+title: "Uncertainty"
+author: "Illak Zapata"
+date: "26/06/2020"
+output: html_document
+---
+
+
+# Load data
+
+```{r load-packages-data, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(lubridate)
+library(ggridges)
+library(gghalves)
+
+atl_weather <- read_csv("data/atl-weather-2019.csv") %>% 
+  mutate(month = month(time, label = TRUE, abbr = FALSE),
+         weekday = wday(time, label = TRUE, abbr = FALSE))
+
+
+```
+
+# Histograms
+
+```{r}
+ggplot(data = atl_weather,
+       mapping = aes(x = windSpeed)) +
+  geom_histogram(binwidth = 1, color = "white", boundary = 1) +
+  scale_x_continuous(breaks = seq(0, 12, by = 1))
+```
+
+
+```{r faceted-histogram}
+ggplot(data = atl_weather,
+       mapping = aes(x = windSpeed, fill = month)) +
+  geom_histogram(binwidth = 1, color = "white", boundary = 1) +
+  scale_x_continuous(breaks = seq(0, 12, by = 1)) +
+  guides(fill = FALSE) +
+  facet_wrap(vars(month), nrow = 2)
+  
+```
+
+# Density plots
+
+```{r}
+ggplot(data = atl_weather,
+       mapping = aes(x = windSpeed)) +
+  geom_density(fill = "grey50") +
+  scale_x_continuous(breaks = seq(0, 12, by = 1))
+```
+
+
+```{r}
+ggplot(data = atl_weather,
+       mapping = aes(x = windSpeed, fill = month)) +
+  geom_density(alpha = .5) +
+  scale_x_continuous(breaks = seq(0, 12, by = 1))
+```
+```{r}
+ggplot(data = atl_weather,
+       mapping = aes(x = temperatureHigh, fill = month, y = fct_rev(month))) +
+  geom_density_ridges(scale = 5, quantile_lines = TRUE, quantiles = 2)
+```
+
+
+```{r}
+ggplot(atl_weather,
+       aes(x = temperatureHigh, y =  fct_rev(month), fill = ..x..)) +
+  geom_density_ridges_gradient(quantile_lines = TRUE, quantiles = 2) +
+  scale_fill_viridis_c(option = "plasma", name = "Temp") +
+  theme_minimal()
+```
+
+
+# Boxes and violins
+
+```{r}
+ggplot(data = atl_weather,
+       mapping = aes(x = windSpeed, fill = month, y = fct_rev(month))) +
+  geom_boxplot()
+```
+
+```{r}
+ggplot(data = atl_weather,
+       mapping = aes(x = windSpeed, fill = month, y = fct_rev(month))) +
+  geom_violin() +
+  geom_point(size = .3, position = position_jitter(height = .1))
+```
+
+```{r}
+ggplot(data = atl_weather,
+       mapping = aes(x = fct_rev(weekday), y = windSpeed)) +
+  geom_half_point(aes(color = weekday), side = "l", size =.2) +
+  geom_half_violin(aes(fill = weekday), side = "r") +
+  coord_flip()
+  
+```
+
